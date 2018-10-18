@@ -19,7 +19,7 @@ class Calendar {
     private int _normalOff;
     private int _specialOff;
     private int _maxStint;
-    private ArrayList<Object> _breakpoints;
+    private ArrayList<ArrayList> _breakpoints;
     private ArrayList<Object> _workErrors;
     private ArrayList<Object> _dayErrors;
     private int _small;
@@ -43,7 +43,7 @@ class Calendar {
         _maxStint = ms;
     }
 
-    public ArrayList<Object> get_breakpoints() {
+    public ArrayList<ArrayList> get_breakpoints() {
         return _breakpoints;
     }
 
@@ -128,11 +128,11 @@ class Calendar {
 
     void getStintBreakpoints() {
         if(get_breakpoints() != null) get_breakpoints().clear();
-        ArrayList<Object> allBreakPoints = new ArrayList<>();
+        ArrayList<ArrayList> allBreakPoints = new ArrayList<>();
         for (int j = 0; j < _calendar.length - 2; j++)
         {
             int combo = 0;
-            ArrayList<Integer> workerBreakPoints = new ArrayList<Integer>();
+            ArrayList<Integer> workerBreakPoints = new ArrayList<>();
             for (int i = 0;i < _calendar[j].length - 1; i++)
             {
                 if (workerBreakPoints.contains(i)) {
@@ -155,20 +155,38 @@ class Calendar {
         }
         _breakpoints = allBreakPoints;
     }
- /*
+
     void fixStints() {
         if(get_breakpoints() != null) {
             for (int i = 0; i < get_breakpoints().size(); i++) {
-                if (!get_breakpoints().get(i).toString().equals("[]"))
+                ArrayList subList = get_breakpoints().get(i);
+                if (subList.size() != 0) {
+                    for (int j = 0; j < subList.size(); j++) {
+                        //System.out.println(subList.get(j));
+                        // i = worker, j = päivä, johon pitää laittaa vapaapäivä (=1)
+                        for (int k = 0; k < _calendar[i].length - 1; k++) {
+                            if(_calendar[i][k] == 1 && k != Integer.parseInt(subList.get(j).toString())) {
+                                _calendar[i][k] = 0;
+                                _calendar[i][Integer.parseInt(subList.get(j).toString())] = 1;
+                            }
+                        }
+                    }
+                }
+
+                /*
+                if (get_breakpoints().get(i).toString().substring(1,2) != "]")
                 {
                     int pilkku = get_breakpoints().get(i).toString().indexOf(',');
-                    int a = Integer.parseInt(get_breakpoints().get(i).toString().substring(pilkku - 1,pilkku));
+                    int a = Integer.parseInt(get_breakpoints().get(i).toString().substring(pilkku - 1, pilkku +1));
+                    System.out.println(a);
                     // To be continued
                 }
+                 */
             }
         }
+        //System.out.println(get_breakpoints().toString());
     }
-*/
+
     void findWorstDays() {
         // pitäisi tallentaa indeksinumero perkele!
         ArrayList<Integer> smallestValue = new ArrayList<>();
@@ -233,21 +251,24 @@ class Calendar {
     }
 
     boolean isSolved() {
+        getStintBreakpoints();
+        runDayFunctions();
 
-        for (int i = 1; i <= 2; i++)
+
+        for (int i = _calendar.length - 2; i < _calendar.length; i++)
         {
-            for (int debug : _calendar[_calendar.length - i]) {
-                if (debug == 1) return false;
+            for (int debug : _calendar[i]) {
+                if (debug != 0) return false;
             }
         }
         //return true;
 
         // voiks tää jumalainen purkka ees toimia?!
-/*
+
         for(int i = 0; i < get_breakpoints().size() - 1; i++) {
-            if (!get_breakpoints().get(i).equals("[]")) return false;
+            if (get_breakpoints().get(i).size() != 0) return false;
         }
-*/
+
         return true;
     }
 
