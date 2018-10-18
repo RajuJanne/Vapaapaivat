@@ -1,5 +1,6 @@
 package RajuJanne.vp;
 
+import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Random;
@@ -21,6 +22,9 @@ class Calendar {
     private ArrayList<Object> _breakpoints;
     private ArrayList<Object> _workErrors;
     private ArrayList<Object> _dayErrors;
+    private int _small;
+    private int _high;
+    private Boolean _worstDaysSet;
 
     Calendar(int we, int wo, int od, int no, int so, int ms)
     {
@@ -38,12 +42,6 @@ class Calendar {
         _specialOff = so;
         _maxStint = ms;
     }
-
-/*
-public int[][] get_calendar () {
-return _calendar;
-}
-*/
 
     public ArrayList<Object> get_breakpoints() {
         return _breakpoints;
@@ -85,7 +83,9 @@ return _calendar;
     void getDayErrors() {
         // palauttaa päivän lomailijoiden määrän ja halutun määrän erotuksen
         // positiivinen = liikaa työläisiä vapaalla. negatiivinen = liian vähän
-
+        int lastLine = _calendar.length - 1;
+        // nollaa edelliset virheet.
+        _calendar[lastLine] = new int[_calendar[lastLine].length];
 
         for (int i = 0; i < _calendar.length - 2; i++) {
 
@@ -93,7 +93,7 @@ return _calendar;
                 // jokaisen työntekijän i päivä j käydään läpi, ja vapaapäivän löytyessä nostetaan "val" arvoa yhdellä
                 if (_calendar[i][j] == 1)
                 {
-                    _calendar[_calendar.length -1][j]++;
+                    _calendar[lastLine][j]++;
                 }
             }
         }
@@ -127,11 +127,12 @@ return _calendar;
     // kurkistaa aina yhden eteenpäin, eli ajavan loopin määrittelyssä pitää muistaa lopettaa loopin suoritus yhtä aikaisemmin.
 
     void getStintBreakpoints() {
+        if(get_breakpoints() != null) get_breakpoints().clear();
         ArrayList<Object> allBreakPoints = new ArrayList<>();
         for (int j = 0; j < _calendar.length - 2; j++)
         {
             int combo = 0;
-            ArrayList<Integer> workerBreakPoints = new ArrayList<>();
+            ArrayList<Integer> workerBreakPoints = new ArrayList<Integer>();
             for (int i = 0;i < _calendar[j].length - 1; i++)
             {
                 if (workerBreakPoints.contains(i)) {
@@ -154,12 +155,25 @@ return _calendar;
         }
         _breakpoints = allBreakPoints;
     }
-
-    void fixWorstDays() {
+ /*
+    void fixStints() {
+        if(get_breakpoints() != null) {
+            for (int i = 0; i < get_breakpoints().size(); i++) {
+                if (!get_breakpoints().get(i).toString().equals("[]"))
+                {
+                    int pilkku = get_breakpoints().get(i).toString().indexOf(',');
+                    int a = Integer.parseInt(get_breakpoints().get(i).toString().substring(pilkku - 1,pilkku));
+                    // To be continued
+                }
+            }
+        }
+    }
+*/
+    void findWorstDays() {
         // pitäisi tallentaa indeksinumero perkele!
         ArrayList<Integer> smallestValue = new ArrayList<>();
         ArrayList<Integer> highestValue = new ArrayList<>();
-        smallestValue.add(_calendar[_calendar.length-1][0]);
+        smallestValue.add(0);
         for (int i = 1; i < _calendar[_calendar.length-1].length; i++)
         {
             // tää alkaa näyttää sellaselta vitun avaruusoopperalta taas et ei vittu
@@ -171,7 +185,7 @@ return _calendar;
                 smallestValue.add(i);
             }
         }
-        highestValue.add(_calendar[_calendar.length-1][0]);
+        highestValue.add(0);
         for (int i = 1; i < _calendar[_calendar.length-1].length; i++) {
             if (_calendar[_calendar.length - 1][i] > _calendar[_calendar.length - 1][highestValue.get(0)]) {
                 highestValue = new ArrayList<>();
@@ -180,17 +194,61 @@ return _calendar;
                 highestValue.add(i);
             }
         }
-        // valitaan satunnainen matalin ja korkein
-        int small = smallestValue.get(new Random().nextInt(smallestValue.size()));
-        int high = highestValue.get(new Random().nextInt(highestValue.size()));
+        // valitaan satunnainen matalin ja korkein -> tallennetaan kenttämuuttujiin.
+        _small = smallestValue.get(new Random().nextInt(smallestValue.size()));
+        _high = highestValue.get(new Random().nextInt(highestValue.size()));
+        _worstDaysSet = true;
 
-        // seuraavaksi haetaan smallest indeksillä työntekijä, jolla on työpäivä, laitetaan se vapaalle,
+        // seuraavaksi täytyy hakea smallest indeksillä työntekijä, jolla on työpäivä, laitetaan se vapaalle,
         // ja annetaan samalle hemmolle vapaapäivä highest indeksillä, mikäli sillä ei ole jo.
         // todennäköisesti heitetään uuteen funktioon tämä käsittely.
     }
 
-    void fixWorstWorkers() {
+    void swapWorstDays() {
+        //if (!_worstDaysSet) fixWorstWorkers();
 
+        // eli nyt pitäis löytää i-indeksi, jolla on j=high indeksi, muttei j=small ja siirtää high->small
+        for (int[] worker : _calendar) {
+            if (worker[_high] == 1 && worker[_small] == 0) {
+                worker[_high] = 0;
+                worker[_small] = 1;
+                _worstDaysSet = false;
+                _high = -1;
+                _small = -1;
+                break;
+            }
+        }
+    }
+
+    void runDayFunctions() {
+        getDayErrors();
+        getWorkerErrors();
+        calculateDayOffDifferentials();
+        findWorstDays();
+    }
+
+
+    void fixWorstWorkers() {
+        // pitäs tutkailla niitä vitun viikonloppuja rip
+    }
+
+    boolean isSolved() {
+
+        for (int i = 1; i <= 2; i++)
+        {
+            for (int debug : _calendar[_calendar.length - i]) {
+                if (debug == 1) return false;
+            }
+        }
+        //return true;
+
+        // voiks tää jumalainen purkka ees toimia?!
+/*
+        for(int i = 0; i < get_breakpoints().size() - 1; i++) {
+            if (!get_breakpoints().get(i).equals("[]")) return false;
+        }
+*/
+        return true;
     }
 
     void ToString() {
