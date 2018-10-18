@@ -14,6 +14,7 @@ public class Solver {
     int _maxStint = 6; //ei pakollinen
     int _normalOff = 2; //arkena vapaalla
     int _specialOff = 5; //vkl vapaalla
+    int _multip = 1;
     Calendar c;
 
     public Solver ()
@@ -28,6 +29,7 @@ public class Solver {
         _offdays *= multip;
         _normalOff *= multip;
         _specialOff *= multip;
+        _multip = multip;
         // mitä vittua stintille tehää häh
     }
 
@@ -58,17 +60,28 @@ public class Solver {
         do {
             // annetaan Solve metodille 50 yritystä aikaa selvittää paskansa, tai alotetaan alusta.
             Initialize();
-            for (int i = 0; i < 50; i++) {
-                c.runDayFunctions();
-                c.getStintBreakpoints();
+            for (int i = 0; i < 25 * _multip; i++) {
+                //c.runDayFunctions();
+                //c.getStintBreakpoints();
                 //c.fixStints();
                 if(c.isSolved()) { stop = true;  break; }
-                else c.swapWorstDays();
+                else  {
+                    c.swapWorstDays();
+                    //c.fixStints();
+                }
+                if(c.isSolved()) { stop = true;  break; }
+                else  {
+                    //c.swapWorstDays();
+                    c.fixStints();
+                }
             }
             if (stop) {
+                System.out.println("0 = working, 1 = day off");
                 c.ToString();
                 System.out.println();
                 c.getStintBreakpoints();
+                //c.fixStints();
+                System.out.println("Debug print for work stints, empty array means no excessive stints found for the worker.");
                 System.out.println(c.get_breakpoints());
                 break;
             }
