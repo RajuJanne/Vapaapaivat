@@ -32,7 +32,7 @@ public class Solver {
         _multip = multip;
         // mitä vittua stintille tehää häh
     }
-
+  
     public Solver (int we, int wo, int od, int no, int so)
     {
         _weeks = we;
@@ -46,12 +46,6 @@ public class Solver {
     {
         c = new Calendar(_weeks, _workers, _offdays, _normalOff, _specialOff, _maxStint);
         c.seedCalendar(_offdays);
-        /*
-        c.getStintBreakpoints();
-        c.getWorkerErrors();
-        c.getDayErrors();
-        c.calculateDayOffDifferentials();
-         */
     }
     public void Run()
     {
