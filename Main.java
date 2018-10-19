@@ -1,13 +1,9 @@
-package JTR;
-
-/**
- *
- * @author Janne Rajuvaara, NTK17SP
- */
+package RajuJanne.vp;
 
 public class Main {
-    public static void main (String[] args) {
-        Solver s0 = new Solver();
-        s0.Run();
+    public static void main(String[] args) {
+        Solver s = new Solver();
+
+        s.Run();
     }
 }
